@@ -106,6 +106,18 @@ class MainMenuScreen(private val game: Main) : Screen {
         btnLeaderboard = TextButton("Leaderboard", btnLeaderboardStyle)
         layout.row()
         layout.add(btnLeaderboard).height(75f)
+
+        // Listener
+        btnStart.addListener(object : ClickListener() {
+            override fun clicked(event: InputEvent?, x: Float, y: Float) {
+                Gdx.app.log("MainMenuScreen", "Start button is pressed")
+            }
+        })
+        btnLeaderboard.addListener(object : ClickListener() {
+            override fun clicked(event: InputEvent?, x: Float, y: Float) {
+                Gdx.app.log("MainMenuScreen", "Leaderboard button is pressed")
+            }
+        })
     }
 
     override fun show() {
@@ -126,19 +138,6 @@ class MainMenuScreen(private val game: Main) : Screen {
             touchPos.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
             stage.viewport.camera.unproject(touchPos)
         }
-
-        btnStart.addListener(object : ClickListener() {
-            override fun touchDown(
-                event: InputEvent?,
-                x: Float,
-                y: Float,
-                pointer: Int,
-                button: Int
-            ): Boolean {
-                Gdx.app.log("MainMenuScreen", "Start button is touched")
-                return true
-            }
-        })
     }
 
     override fun resize(width: Int, height: Int) {
