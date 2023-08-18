@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter
+import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Stage
@@ -29,6 +30,7 @@ class MainMenuScreen(private val game: Main) : Screen {
     private lateinit var stage: Stage
     private lateinit var layout: Table
 
+    // Default screen resolution
     private var width: Float = 720f
     private var height: Float = 1600f
 
@@ -53,64 +55,83 @@ class MainMenuScreen(private val game: Main) : Screen {
 
     init {
         // Stage
-        stage = Stage(ExtendViewport(width, height, OrthographicCamera()))
-
+        stage = Stage(ExtendViewport(width, height, OrthographicCamera()), game.batch)
         Gdx.input.inputProcessor = stage
 
         // UI table
         layout = Table()
-        layout.setFillParent(true)
-        layout.align(Align.top)
-        stage.addActor(layout)
+            .also {
+                it.setFillParent(true)
+                it.align(Align.top)
+                stage.addActor(it)
+            }
 
         // FreeTypeFont init
         fontGenerator = FreeTypeFontGenerator(Gdx.files.internal("font/kenney_pixel.ttf"))
 
         // Game title
         fontParameter = FreeTypeFontParameter()
-        fontParameter.size = 112
-        lblTitleFont = fontGenerator.generateFont(fontParameter)
+            .also {
+                it.size = 112
+                lblTitleFont = fontGenerator.generateFont(it)
+            }
 
         lblTitleStyle = LabelStyle()
-        lblTitleStyle.font = lblTitleFont
+            .also { it.font = lblTitleFont }
 
         lblTitle = Label("Brick Breaker", lblTitleStyle)
-        layout.add(lblTitle).height(1000f)
+            .also { layout.add(it).height(1000f) }
 
         // Start button init
         fontParameter = FreeTypeFontParameter()
-        fontParameter.size = 36
-        fontParameter.color = Color(0.1f, 0.1f, 0.1f, 1f)
-        btnStartFont = fontGenerator.generateFont(fontParameter)
+            .also {
+                it.size = 36
+                it.color = Color(0.1f, 0.1f, 0.1f, 1f)
+                btnStartFont = fontGenerator.generateFont(it)
+            }
 
         btnStartStyle = TextButtonStyle()
-        btnStartStyle.up = TextureRegionDrawable(TextureRegion(Texture("gfx/button_up.png")))
-        btnStartStyle.down = TextureRegionDrawable(TextureRegion(Texture("gfx/button_down.png")))
-        btnStartStyle.font = btnStartFont
+            .also {
+                it.up = TextureRegionDrawable(TextureRegion(Texture("gfx/button_up.png")))
+                it.down = TextureRegionDrawable(TextureRegion(Texture("gfx/button_down.png")))
+                it.font = btnStartFont
+            }
 
         btnStart = TextButton("Start Game", btnStartStyle)
-        layout.row()
-        layout.add(btnStart).height(75f).pad(100f)
+            .also {
+                layout.row()
+                layout.add(it).height(75f).pad(100f)
+            }
 
         // Leaderboard button init
         fontParameter = FreeTypeFontParameter()
-        fontParameter.size = 36
-        fontParameter.color = Color(0.1f, 0.1f, 0.1f, 1f)
-        btnLeaderboardFont = fontGenerator.generateFont(fontParameter)
+            .also {
+                it.size = 36
+                it.color = Color(0.1f, 0.1f, 0.1f, 1f)
+                btnLeaderboardFont = fontGenerator.generateFont(it)
+            }
+
 
         btnLeaderboardStyle = TextButtonStyle()
-        btnLeaderboardStyle.up = TextureRegionDrawable(TextureRegion(Texture("gfx/button_up.png")))
-        btnLeaderboardStyle.down = TextureRegionDrawable(TextureRegion(Texture("gfx/button_down.png")))
-        btnLeaderboardStyle.font = btnLeaderboardFont
+            .also {
+                it.up = TextureRegionDrawable(TextureRegion(Texture("gfx/button_up.png")))
+                it.down = TextureRegionDrawable(TextureRegion(Texture("gfx/button_down.png")))
+                it.font = btnLeaderboardFont
+            }
+
 
         btnLeaderboard = TextButton("Leaderboard", btnLeaderboardStyle)
-        layout.row()
-        layout.add(btnLeaderboard).height(75f)
+            .also {
+                layout.row()
+                layout.add(it).height(75f)
+            }
 
         // Listener
         btnStart.addListener(object : ClickListener() {
             override fun clicked(event: InputEvent?, x: Float, y: Float) {
-                Gdx.app.log("MainMenuScreen", "Start button is pressed")
+                game.screen = GameScreen(game)
+                dispose()
+//                Gdx.app.log("MainMenu", "New screen started\ndispose()")
             }
         })
         btnLeaderboard.addListener(object : ClickListener() {
@@ -136,7 +157,7 @@ class MainMenuScreen(private val game: Main) : Screen {
         if (Gdx.input.isTouched) {
             val touchPos = Vector3()
             touchPos.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
-            stage.viewport.camera.unproject(touchPos)
+            stage.camera.unproject(touchPos)
         }
     }
 
