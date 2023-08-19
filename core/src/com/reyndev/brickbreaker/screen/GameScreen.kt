@@ -65,10 +65,10 @@ class GameScreen(private val game: Main) : Screen {
             32f,
             32f,
             (width - 32f) / 2f,
-            player.position.y + 32f
+            player.position.y + 50f
         )
         ballDirection = Vector3()
-        ballVelocity = 5f
+        ballVelocity = 1f
     }
 
     override fun show() {}
@@ -118,10 +118,15 @@ class GameScreen(private val game: Main) : Screen {
         // Ball
         ball.move(ballDirection)
 
+        // If the ball collides with screen corner
         if (ball.position.x < 0f || ball.position.x > (width - ball.width))
             ballDirection.x *= -1f
         if (ball.position.y < 0f || ball.position.y > (height - ball.height))
             ballDirection.y *= -1f
+
+        if (ball.collideWidth(player)) {
+            ballDirection.y *= -1f
+        }
     }
 
     override fun resize(width: Int, height: Int) {

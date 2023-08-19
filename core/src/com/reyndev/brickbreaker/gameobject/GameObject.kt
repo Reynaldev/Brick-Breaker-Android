@@ -43,6 +43,16 @@ open class GameObject(
         batch.draw(tx, this.position.x, this.position.y, this.width, this.height)
     }
 
+    override fun collideWidth(other: GameObject): Boolean {
+        if (position.x < other.position.x ||
+            position.x > (other.position.x + other.width) ||
+            position.y < (other.position.y - other.height) ||
+            position.y > (other.position.y + other.height))
+            return false
+
+        return true
+    }
+
     override fun dispose() {
         tx.dispose()
     }

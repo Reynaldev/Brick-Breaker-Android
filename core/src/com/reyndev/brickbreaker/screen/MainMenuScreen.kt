@@ -156,8 +156,10 @@ class MainMenuScreen(private val game: Main) : Screen {
         // Input
         if (Gdx.input.isTouched) {
             val touchPos = Vector3()
-            touchPos.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
-            stage.camera.unproject(touchPos)
+                .also {
+                    it.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
+                    stage.camera.unproject(it)
+                }
         }
     }
 
