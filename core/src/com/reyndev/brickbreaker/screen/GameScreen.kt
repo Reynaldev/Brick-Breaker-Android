@@ -5,6 +5,7 @@ import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.math.Matrix3
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Table
@@ -12,11 +13,9 @@ import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.reyndev.brickbreaker.Main
-import com.reyndev.brickbreaker.gameobject.Player
+import com.reyndev.brickbreaker.gameobject.GameObject
 
 class GameScreen(private val game: Main) : Screen {
-    private lateinit var camera: OrthographicCamera
-
     private lateinit var stage: Stage
     private lateinit var layout: Table
 
@@ -24,8 +23,16 @@ class GameScreen(private val game: Main) : Screen {
     private var width: Float = 720f
     private var height: Float = 1600f
 
+    // Game
+    private var newStart: Boolean = true
+
     // Player
-    private lateinit var player: Player
+    private lateinit var player: GameObject
+
+    // Ball
+    private lateinit var ball: GameObject
+    private lateinit var ballDirection: Vector3
+    private var ballVelocity: Float = 0f
 
     init {
         // Stage init
@@ -43,14 +50,25 @@ class GameScreen(private val game: Main) : Screen {
                 stage.addActor(it)
             }
 
-        // Player
-        player = Player(
+        // Player init
+        player = GameObject(
             Texture("gfx/paddle.png"),
             256f,
-            64f,
+            32f,
             (width - 256f) / 2f,
             200f
         )
+
+        // Ball init
+        ball = GameObject(
+            Texture("gfx/ball.png"),
+            32f,
+            32f,
+            (width - 32f) / 2f,
+            player.position.y + 32f
+        )
+        ballDirection = Vector3()
+        ballVelocity = 5f
     }
 
     override fun show() {}
@@ -67,6 +85,7 @@ class GameScreen(private val game: Main) : Screen {
         // Batch
         stage.batch.begin()
         player.update(stage.batch)
+        ball.update(stage.batch)
         stage.batch.end()
 
         // Input
@@ -78,15 +97,31 @@ class GameScreen(private val game: Main) : Screen {
                     stage.camera.unproject(it)
                 }
 
-            player.move(touchPos.x, 0f)
+            if (newStart) {
+                ballDirection = Vector3(2f, 3f, 0f)
+
+                newStart = false
+                return
+            }
+
+            player.position.x = touchPos.x - (player.width / 2f)
         }
 
-        // Player logic
-        // Player border
-        if (player.rect.x < 0f)
-            player.rect.x = 0f
-        if (player.rect.x > (width - player.width))
-            player.rect.x = width - player.width
+        // Update
+
+        // Player
+        if (player.position.x < 0f)
+            player.position.x = 0f
+        if (player.position.x > (width - player.width))
+            player.position.x = width - player.width
+
+        // Ball
+        ball.move(ballDirection)
+
+        if (ball.position.x < 0f || ball.position.x > (width - ball.width))
+            ballDirection.x *= -1f
+        if (ball.position.y < 0f || ball.position.y > (height - ball.height))
+            ballDirection.y *= -1f
     }
 
     override fun resize(width: Int, height: Int) {
@@ -100,8 +135,8 @@ class GameScreen(private val game: Main) : Screen {
     override fun hide() {}
 
     override fun dispose() {
-        // Destroy player
         stage.dispose()
         player.dispose()
+        ball.dispose()
     }
 }
